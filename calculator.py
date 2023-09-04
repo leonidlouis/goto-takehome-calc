@@ -93,20 +93,50 @@ class Calculator:
         return self.total
     
     def execute(self, command):
+        # Split the command and initialize default values
         parts = command.split()
         operation = parts[0]
-        
-        try:
-            if operation == 'repeat':
-                n = int(parts[1])
-                return self.repeat(n)
-            elif operation in ['add', 'subtract', 'multiply', 'divide']:
-                value = float(parts[1])
-                return getattr(self, operation)(value)
-            else:
-                return getattr(self, operation)() 
-        except AttributeError:
+        value = None if len(parts) < 2 else parts[1]
+
+        # Dictionary to map commands to their functions
+        operations_map = {
+            'add': self.add,
+            'subtract': self.subtract,
+            'multiply': self.multiply,
+            'divide': self.divide,
+            'repeat': self.repeat,
+            'neg': self.neg,
+            'abs': self.abs,
+            'sqr': self.sqr,
+            'sqrt': self.sqrt,
+            'cube': self.cube,
+            'cubert': self.cubert,
+            'cancel': self.cancel
+        }
+
+        # Validate the command
+        if operation not in operations_map:
             return f"Unrecognized command: {operation}"
+
+        if not value and operation in ['add', 'subtract', 'multiply', 'divide', 'repeat']:
+            return f"'{operation}' command requires a numeric value."
+
+        if value and operation in ['neg', 'abs', 'sqr', 'sqrt', 'cube', 'cubert', 'cancel']:
+            return f"'{operation}' command doesn't accept a value."
+
+        try:
+            if operation in ['add', 'subtract', 'multiply', 'divide']:
+                value = float(value)
+            elif operation == 'repeat':
+                value = int(value)
+            
+            if value is not None:
+                return operations_map[operation](value)
+            else:
+                return operations_map[operation]()
+
+        except ValueError:
+            return f"You must input numbers for the '{operation}' operation."
         except Exception as e:
             return f"Error executing command: {e}"
 
